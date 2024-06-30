@@ -1,0 +1,32 @@
+name: 'Submitty Action Docker Matrix'
+description: 'Builds the matrix for reusable docker build action'
+inputs:
+  docker-username:
+    required: true
+    type: string
+  base-commit:
+    required: true
+    type: string
+  head-commit:
+    required: true
+    type: string
+outputs:
+  matrix:
+    value: ${{ steps.generate-matrix.outputs.matrix }}
+  run_docker_jobs:
+    value: ${{ steps.set-run-docker.outputs.run_docker_jobs }}
+runs:
+  using: "composite"
+  steps:
+    - name: Generate Matrix
+      id: generate-matrix
+      run: echo "matrix=$(python3 bin/generate_matrix.py ${{ inputs.docker-username }} ${{ inputs.base-commit }} ${{ inputs.head-commit }})" >> $GITHUB_OUTPUT
+    - name: Set Run Condition
+      id: set-run-docker
+      run: |
+          num_to_build=$(echo '${{ steps.generate-matrix.outputs.matrix }}' | jq '.include | length')
+          if [[ "$num_to_build" -eq 0 ]]; then
+            echo "run_docker_jobs=false" >> $GITHUB_OUTPUT
+          else
+            echo "run_docker_jobs=true" >> $GITHUB_OUTPUT
+          fi
