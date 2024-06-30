@@ -22,6 +22,10 @@ runs:
       id: generate-matrix
       shell: bash
       run: echo "matrix=$(python3 ${{ github.action_path }}/bin/generate_matrix.py ${{ inputs.docker-username }} ${{ inputs.base-commit }} ${{ inputs.head-commit }})" >> $GITHUB_OUTPUT
+    - name: List Matrix
+      shell: bash
+      run: |
+        echo ${{ steps.generate-matrix.outputs.matrix }}
     - name: Set Run Condition
       id: set-run-docker
       shell: bash
